@@ -3,7 +3,26 @@ import re
 import streamlit as st
 import io
 import zipfile
+import streamlit.components.v1 as components
 
+# --- Google Analytics (GA4) ---
+GA_MEASUREMENT_ID = "G-CY3RHVG4M4"
+
+ga_code = f"""
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', '{GA_MEASUREMENT_ID}');
+</script>
+"""
+
+# Inject GA4 tracking code
+components.html(ga_code, height=0, width=0)
+
+# -------------------------------
 # ฟังก์ชันล้างวงเล็บและเติมวงเล็บให้รหัสสาขา (เลข 5 หลัก)
 def process_text_step1(text):
     if not isinstance(text, str):
@@ -94,6 +113,7 @@ def process_data(df):
         st.error(f"เกิดข้อผิดพลาด: {e}")
         return None
 
+# -------------------------------
 # ส่วนแสดงผลของ Streamlit
 st.title("📄 ระบบตรวจสอบข้อมูลการต่อใบอนุญาตสรรพสามิตอัตโนมัติ")
 
