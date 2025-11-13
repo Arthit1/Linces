@@ -29,9 +29,11 @@ def process_text_step1(text):
         return text
 
     # 1. ลบวงเล็บที่ไม่ใช่รหัสสาขา
+    #    ✅ อนุญาตให้ทั้ง "เลข 4 หลัก" และ "เลข 5 หลัก" อยู่ในวงเล็บได้ (ใช้เป็น ID)
     def replace_non_id_parentheses(match):
         inner = match.group(1)
-        if re.fullmatch(r'\d{5}', inner):  # รหัสสาขา
+        # UPDATED: เดิมใช้ \d{5} → ตอนนี้ใช้ \d{4,5}
+        if re.fullmatch(r'\d{4,5}', inner):  # รหัสสาขา 4 หรือ 5 หลัก
             return f'({inner})'
         else:
             return inner  # ลบวงเล็บ แต่คงข้อความไว้
@@ -39,6 +41,7 @@ def process_text_step1(text):
     text = re.sub(r'\(([^)]+)\)', replace_non_id_parentheses, text)
 
     # 2. เติมวงเล็บให้เลข 5 หลักที่ไม่มีอยู่ใน ()
+    #    (ไม่สร้างเลขใหม่ แค่ครอบวงเล็บให้เลข 5 หลักที่มีอยู่แล้วเท่านั้น)
     existing_ids = set(re.findall(r'\((\d{5})\)', text))
 
     def add_parentheses(match):
@@ -84,7 +87,8 @@ def process_data(df):
         df_cleaned = df_cleaned.drop(columns=['group_name'])
 
         # ตรวจจับรหัสสาขา
-        df_cleaned['detected_id'] = df_cleaned['company_name'].str.extract(r'\((\d{5})\)')
+        # UPDATED: เดิมใช้ r'\((\d{5})\)' → ตอนนี้รองรับ 4 หรือ 5 หลัก r'\((\d{4,5})\)'
+        df_cleaned['detected_id'] = df_cleaned['company_name'].str.extract(r'\((\d{4,5})\)')
 
         # แยกเป็น 2 กลุ่ม
         df_with_id = df_cleaned[df_cleaned['detected_id'].notnull()].copy()
